@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raj Battery - Business Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #1a2744;
+    --navy2: #243560;
+    --gold: #f59e0b;
+    --gold2: #d97706;
+    --bg: #f0f2f8;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text2: #64748b;
+    --border: #e2e8f0;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --amber-bg: #fef3c7;
+    --amber: #92400e;
+    --blue-bg: #dbeafe;
+    --blue: #1e40af;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: var(--navy);
+    color: white;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 40px; height: 40px; background: var(--gold);
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 20px;
+  }
+  .logo-text { line-height: 1.2; }
+  .logo-text h1 { font-size: 16px; font-weight: 700; color: white; letter-spacing: 1px; }
+  .logo-text span { font-size: 11px; color: #94a3b8; }
+  .nav { display: flex; gap: 4px; }
+  .nav-btn {
+    padding: 8px 14px; border-radius: 8px; border: none;
+    background: transparent; color: #94a3b8; cursor: pointer;
+    font-size: 13px; font-weight: 500; font-family: 'Poppins', sans-serif;
+    transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+  .nav-btn.active { background: var(--gold); color: var(--navy); }
+
+  /* ===== LAYOUT ===== */
+  .content { padding: 28px; max-width: 1200px; margin: 0 auto; }
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== COMMON ===== */
+  .section-title {
+    font-size: 20px; font-weight: 600; color: var(--navy);
+    margin-bottom: 22px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-title svg { width: 22px; height: 22px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px; margin-bottom: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--navy); }
+
+  /* ===== GRID ===== */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 18px; }
+  @media (max-width: 768px) {
+    .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+    .nav-btn span { display: none; }
+    .header { padding: 0 14px; }
+    .content { padding: 16px; }
+  }
+
+  /* ===== STAT CARDS ===== */
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .stat-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--navy); }
+  .stat-icon { float: right; width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+  /* ===== FORM ===== */
+  label { font-size: 12px; font-weight: 600; color: var(--text2); display: block; margin-bottom: 5px; margin-top: 14px; text-transform: uppercase; letter-spacing: 0.4px; }
+  input, select, textarea {
+    width: 100%; padding: 9px 12px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 14px; color: var(--text);
+    background: #fff; font-family: 'Poppins', sans-serif; transition: border 0.15s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(245,158,11,0.1); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    padding: 10px 18px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+    background: #fff; color: var(--text); cursor: pointer; font-size: 13px;
+    font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { background: #f8fafc; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary { background: var(--navy); color: white; border-color: var(--navy); }
+  .btn-primary:hover { background: var(--navy2); }
+  .btn-gold { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+  .btn-gold:hover { background: var(--gold2); border-color: var(--gold2); }
+  .btn-danger { background: var(--red-bg); color: var(--red); border-color: #fca5a5; }
+  .btn-danger:hover { background: #fecaca; }
+  .btn-green { background: var(--green-bg); color: var(--green); border-color: #86efac; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; }
+
+  /* ===== TABLE ===== */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; background: #f8fafc; color: var(--text2); font-weight: 600; border-bottom: 1.5px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  /* ===== BADGES ===== */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); }
+  .badge-navy { background: #e0e7ff; color: var(--navy); }
+
+  /* ===== DIVIDER ===== */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+  /* ===== BILL ITEMS ===== */
+  .bill-items-header { display: grid; grid-template-columns: 2.5fr 80px 120px 100px 36px; gap: 8px; font-size: 11px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; padding: 0 4px 6px; }
+  .bill-item-row { display: grid; grid-template-columns: 2.5fr 80px 120px 100px 36px; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .bill-amt { font-size: 14px; font-weight: 600; color: var(--navy); padding: 9px 0; }
+
+  /* ===== TOTALS ===== */
+  .totals-box { background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; margin-top: 14px; }
+  .total-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+  .total-row span:first-child { color: var(--text2); }
+  .total-grand { border-top: 2px solid var(--navy); margin-top: 8px; padding-top: 10px; font-size: 16px; font-weight: 700; color: var(--navy); }
+
+  /* ===== STOCK ===== */
+  .stock-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+  .stock-row:last-child { border-bottom: none; }
+  .stock-name { font-size: 14px; font-weight: 600; }
+  .stock-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .stock-controls { display: flex; align-items: center; gap: 8px; }
+  .qty-btn { width: 30px; height: 30px; border-radius: 6px; border: 1.5px solid var(--border); background: #fff; cursor: pointer; font-size: 18px; line-height: 1; font-weight: 600; color: var(--navy); transition: all 0.1s; }
+  .qty-btn:hover { background: var(--gold); border-color: var(--gold); color: white; }
+  .qty-box { width: 56px; text-align: center; font-weight: 700; font-size: 15px; }
+  .price-box { width: 90px; font-size: 13px; }
+
+  /* ===== TABS ===== */
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+  .tab { padding: 10px 20px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+  .tab.active { color: var(--gold2); border-bottom-color: var(--gold); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* ===== MODAL ===== */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: flex-start; justify-content: center; padding: 30px 20px; overflow-y: auto; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: white; border-radius: var(--radius); width: 100%; max-width: 680px; padding: 28px; margin: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.2s ease; }
+  @keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-title { font-size: 18px; font-weight: 700; color: var(--navy); }
+  .close-btn { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border); background: #f8fafc; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; color: var(--text2); line-height: 1; font-family: monospace; }
+  .close-btn:hover { background: var(--red-bg); color: var(--red); border-color: #fca5a5; }
+
+  /* ===== ALERTS ===== */
+  .alert { padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 12px; font-weight: 500; }
+  .alert-success { background: var(--green-bg); color: var(--green); border: 1px solid #86efac; }
+  .alert-error { background: var(--red-bg); color: var(--red); border: 1px solid #fca5a5; }
+
+  /* ===== EMPTY STATE ===== */
+  .empty { text-align: center; padding: 50px 20px; color: var(--text2); }
+  .empty-icon { font-size: 48px; margin-bottom: 10px; opacity: 0.4; }
+
+  /* ===== SEARCH ===== */
+  .search-wrap { position: relative; }
+  .search-wrap input { padding-left: 36px; }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text2); pointer-events: none; }
+
+  /* ===== WARRANTY ===== */
+  .warranty-card { background: var(--green-bg); border: 1px solid #86efac; border-radius: var(--radius-sm); padding: 12px 16px; margin-top: 14px; font-size: 13px; }
+  .warranty-card strong { color: var(--green); }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f1f5f9; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo-wrap">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">
+      <h1>RAJ BATTERY</h1>
+      <span>Business Management System</span>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('dashboard')">🏠 <span>Dashboard</span></button>
+    <button class="nav-btn" onclick="showPage('billing')">🧾 <span>New Bill</span></button>
+    <button class="nav-btn" onclick="showPage('customers')">👥 <span>Customers</span></button>
+    <button class="nav-btn" onclick="showPage('stock')">📦 <span>Stock</span></button>
+    <button class="nav-btn" onclick="showPage('bills')">📄 <span>All Bills</span></button>
+  </nav>
+</header>
+
+<div class="content">
+
+  <!-- ============ DASHBOARD ============ -->
+  <div id="page-dashboard" class="page active">
+    <div class="section-title">🏠 Dashboard</div>
+    <div class="grid4" style="margin-bottom:20px;">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#e0e7ff;">📄</div>
+        <div class="stat-label">Total Bills</div>
+        <div class="stat-value" id="d-bills">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dcfce7;">👥</div>
+        <div class="stat-label">Customers</div>
+        <div class="stat-value" id="d-customers">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;">💰</div>
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value" id="d-revenue" style="font-size:22px;">₹0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
+        <div class="stat-label">Low Stock Items</div>
+        <div class="stat-value" id="d-lowstock">0</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">📋 Recent Bills</div>
+        <div id="d-recent"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚠️ Low Stock Alert</div>
+        <div id="d-alerts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BILLING ============ -->
+  <div id="page-billing" class="page">
+    <div class="section-title">🧾 Create New Bill</div>
+    <div class="card">
+      <div id="bill-alert"></div>
+      <div class="form-row">
+        <div>
+          <label>Customer Name *</label>
+          <input type="text" id="b-name" placeholder="Enter full name">
+        </div>
+        <div>
+          <label>Phone Number</label>
+          <input type="text" id="b-phone" placeholder="+91 XXXXX XXXXX">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Address</label>
+          <input type="text" id="b-addr" placeholder="Customer address">
+        </div>
+        <div>
+          <label>Bill Date</label>
+          <input type="date" id="b-date">
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="card-title">🔋 Battery / Inverter Items</div>
+      <div class="bill-items-header">
+        <span>Item / Battery Type</span><span>Qty</span><span>Unit Price (₹)</span><span>Amount</span><span></span>
+      </div>
+      <div id="b-items"></div>
+      <button class="btn btn-sm" onclick="addItem()" style="margin-top:6px;">➕ Add Item</button>
+
+      <hr class="divider">
+      <div class="form-row">
+        <div>
+          <label>Warranty Period (Months)</label>
+          <input type="number" id="b-warr" placeholder="e.g. 12" min="0" oninput="updateWarrantyPreview()">
+        </div>
+        <div>
+          <label>Warranty Start Date</label>
+          <input type="date" id="b-warr-start" oninput="updateWarrantyPreview()">
+        </div>
+      </div>
+      <div id="warranty-preview"></div>
+
+      <div class="form-row">
+        <div>
+          <label>GST %</label>
+          <input type="number" id="b-gst" value="18" min="0" max="100" oninput="calcTotals()">
+        </div>
+        <div>
+          <label>Discount (₹)</label>
+          <input type="number" id="b-disc" value="0" min="0" oninput="calcTotals()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Payment Mode</label>
+          <select id="b-pay">
+            <option>Cash</option>
+            <option>UPI / GPay</option>
+            <option>Card</option>
+            <option>Bank Transfer</option>
+            <option>Credit / Udhar</option>
+          </select>
+        </div>
+        <div>
+          <label>Notes (Optional)</label>
+          <input type="text" id="b-notes" placeholder="Special instructions, etc.">
+        </div>
+      </div>
+
+      <div class="totals-box" id="totals-box">
+        <div class="total-row"><span>Subtotal</span><span id="t-sub">₹0.00</span></div>
+        <div class="total-row"><span>GST Amount</span><span id="t-gst">₹0.00</span></div>
+        <div class="total-row"><span>Discount</span><span id="t-disc" style="color:#dc2626;">-₹0.00</span></div>
+        <div class="total-row total-grand"><span>GRAND TOTAL</span><span id="t-grand">₹0.00</span></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveBill()">💾 Save Bill</button>
+        <button class="btn btn-gold" onclick="previewPDF()">📄 Download PDF Bill</button>
+        <button class="btn" onclick="resetBill()">🔄 Reset Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CUSTOMERS ============ -->
+  <div id="page-customers" class="page">
+    <div class="section-title">👥 Customers</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="search-wrap" style="flex:1;max-width:320px;">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search customers..." oninput="filterCustomers(this.value)">
+        </div>
+        <span id="cust-count" style="font-size:13px;color:var(--text2);"></span>
+      </div>
+      <div class="table-wrap" id="cust-table"></div>
+    </div>
+  </div>
+
+  <!-- ============ STOCK ============ -->
+  <div id="page-stock" class="page">
+    <div class="section-title">📦 Stock Management</div>
+    <div class="tabs">
+      <div class="tab active" onclick="showStockTab('lb', this)">🔋 Batteries (Lbs)</div>
+      <div class="tab" onclick="showStockTab('ah', this)">⚡ Batteries (Ah)</div>
+      <div class="tab" onclick="showStockTab('inv', this)">🔌 Inverter Items</div>
+    </div>
+    <div id="stock-lb" class="card">
+      <div class="card-title">Battery Stock — Lbs (Weight Based)</div>
+      <div id="sl-lb"></div>
+    </div>
+    <div id="stock-ah" class="card" style="display:none;">
+      <div class="card-title">Battery Stock — Ah (Ampere Hour)</div>
+      <div id="sl-ah"></div>
+    </div>
+    <div id="stock-inv" class="card" style="display:none;">
+      <div class="card-title">Inverter & Accessories Stock</div>
+      <div id="sl-inv"></div>
+    </div>
+  </div>
+
+  <!-- ============ ALL BILLS ============ -->
+  <div id="page-bills" class="page">
+    <div class="section-title">📄 All Bills</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="search-wrap" style="flex:1;max-width:320px;">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search by name or bill no..." oninput="filterBills(this.value)">
+        </div>
+        <span id="bills-count" style="font-size:13px;color:var(--text2);"></span>
+      </div>
+      <div class="table-wrap" id="bills-table"></div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- ===== BILL DETAIL MODAL ===== -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Bill Details</div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div class="btn-row" style="margin-top:18px;">
+      <button class="btn btn-gold" onclick="dlModalPDF()">📄 Download PDF</button>
+      <button class="btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA STORE
+// ============================================================
+const S = {
+  bills: [],
+  counter: 1000,
+  stock: {
+    lb: [
+      { id:'lb-2.5', name:'2.5 Lb Battery',   qty:0, min:5,  price:800  },
+      { id:'lb-4',   name:'4 Lb Battery',      qty:0, min:5,  price:1200 },
+      { id:'lb-z5',  name:'Z5 Lb Battery',     qty:0, min:5,  price:1400 },
+      { id:'lb-5',   name:'5 Lb Battery',      qty:0, min:5,  price:1600 },
+      { id:'lb-9',   name:'9 Lb Battery',      qty:0, min:3,  price:2800 },
+    ],
+    ah: [
+      { id:'ah-30',  name:'30 Ah Battery',     qty:0, min:3,  price:3200 },
+      { id:'ah-40',  name:'40 Ah Battery',     qty:0, min:3,  price:4200 },
+      { id:'ah-45',  name:'45 Ah Battery',     qty:0, min:3,  price:4800 },
+      { id:'ah-60',  name:'60 Ah Battery',     qty:0, min:3,  price:5800 },
+      { id:'ah-80',  name:'80 Ah Battery',     qty:0, min:2,  price:7200 },
+      { id:'ah-90',  name:'90 Ah Battery',     qty:0, min:2,  price:8000 },
+    ],
+    inv: [
+      { id:'inv-600',    name:'Inverter 600VA',        qty:0, min:2,  price:3500  },
+      { id:'inv-800',    name:'Inverter 800VA',        qty:0, min:2,  price:4500  },
+      { id:'inv-1100',   name:'Inverter 1100VA',       qty:0, min:2,  price:6500  },
+      { id:'inv-1500',   name:'Inverter 1500VA',       qty:0, min:2,  price:8500  },
+      { id:'inv-2000',   name:'Inverter 2000VA',       qty:0, min:1,  price:12000 },
+      { id:'inv-cable',  name:'Battery Cable Set',     qty:0, min:5,  price:350   },
+      { id:'inv-troll',  name:'Battery Trolley',       qty:0, min:3,  price:800   },
+      { id:'inv-water',  name:'Distilled Water (1L)',  qty:0, min:10, price:80    },
+      { id:'inv-stand',  name:'Inverter Stand',        qty:0, min:3,  price:600   },
+    ]
+  }
+};
+
+function allStock() { return [...S.stock.lb, ...S.stock.ah, ...S.stock.inv]; }
+function findStock(id) { return allStock().find(x => x.id === id); }
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const pages = ['dashboard','billing','customers','stock','bills'];
+  document.querySelectorAll('.nav-btn')[pages.indexOf(page)].classList.add('active');
+  if (page === 'dashboard')  renderDashboard();
+  if (page === 'billing')    initBilling();
+  if (page === 'customers')  renderCustomers();
+  if (page === 'stock')      renderAllStock();
+  if (page === 'bills')      renderBills();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const uniqueCust = new Set(S.bills.map(b => b.customer)).size;
+  const revenue    = S.bills.reduce((s,b) => s+b.total, 0);
+  const lowStockN  = allStock().filter(x => x.qty <= x.min).length;
+
+  document.getElementById('d-bills').textContent     = S.bills.length;
+  document.getElementById('d-customers').textContent = uniqueCust;
+  document.getElementById('d-revenue').textContent   = '₹' + revenue.toLocaleString('en-IN');
+  document.getElementById('d-lowstock').textContent  = lowStockN;
+
+  // Recent bills
+  const recent = [...S.bills].reverse().slice(0,6);
+  const rEl = document.getElementById('d-recent');
+  if (!recent.length) {
+    rEl.innerHTML = '<div class="empty"><div class="empty-icon">🧾</div>No bills yet</div>';
+  } else {
+    rEl.innerHTML = '<div class="table-wrap"><table><tr><th>Bill #</th><th>Customer</th><th>Date</th><th>Total</th></tr>' +
+      recent.map(b => `<tr>
+        <td><span class="badge badge-navy">${b.billNo}</span></td>
+        <td>${b.customer}</td>
+        <td>${b.date}</td>
+        <td><strong>₹${b.total.toLocaleString('en-IN')}</strong></td>
+      </tr>`).join('') + '</table></div>';
+  }
+
+  // Low stock alerts
+  const low = allStock().filter(x => x.qty <= x.min);
+  const aEl = document.getElementById('d-alerts');
+  if (!low.length) {
+    aEl.innerHTML = '<div style="padding:16px;color:var(--green);font-size:13px;font-weight:600;">✅ All stock levels are good!</div>';
+  } else {
+    aEl.innerHTML = low.map(x =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:13px;font-weight:600;">${x.name}</div>
+          <div style="font-size:11px;color:var(--text2);">Min level: ${x.min}</div>
+        </div>
+        <span class="badge ${x.qty === 0 ? 'badge-red':'badge-amber'}">${x.qty === 0 ? 'OUT':x.qty + ' left'}</span>
+      </div>`
+    ).join('');
+  }
+}
+
+// ============================================================
+// BILLING
+// ============================================================
+let billItems = [];
+
+function initBilling() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('b-date').value         = today;
+  document.getElementById('b-warr-start').value   = today;
+  if (!billItems.length) addItem();
+  renderItems();
+  calcTotals();
+  updateWarrantyPreview();
+}
+
+function addItem() {
+  billItems.push({ uid: Date.now() + Math.random(), stockId:'', qty:1, price:0 });
+  renderItems();
+}
+
+function removeItem(uid) {
+  billItems = billItems.filter(i => i.uid !== uid);
+  if (!billItems.length) addItem();
+  else renderItems();
+}
+
+function renderItems() {
+  const el = document.getElementById('b-items');
+  el.innerHTML = billItems.map(item => {
+    const opts = [
+      `<option value="">-- Select Item --</option>`,
+      `<optgroup label="── Batteries (Lbs) ──">` + S.stock.lb.map(s =>
+        `<option value="${s.id}" ${item.stockId===s.id?'selected':''}>${s.name} (Stock: ${s.qty})</option>`).join('') + `</optgroup>`,
+      `<optgroup label="── Batteries (Ah) ──">` + S.stock.ah.map(s =>
+        `<option value="${s.id}" ${item.stockId===s.id?'selected':''}>${s.name} (Stock: ${s.qty})</option>`).join('') + `</optgroup>`,
+      `<optgroup label="── Inverter Items ──">` + S.stock.inv.map(s =>
+        `<option value="${s.id}" ${item.stockId===s.id?'selected':''}>${s.name} (Stock: ${s.qty})</option>`).join('') + `</optgroup>`,
+    ].join('');
+    const amt = item.qty * item.price;
+    return `<div class="bill-item-row">
+      <select onchange="onSelectItem('${item.uid}', this.value)">${opts}</select>
+      <input type="number" value="${item.qty}" min="1" style="text-align:center;"
+        onchange="onQty('${item.uid}', this.value)">
+      <input type="number" value="${item.price}" min="0"
+        onchange="onPrice('${item.uid}', this.value)">
+      <div class="bill-amt">₹${amt.toLocaleString('en-IN')}</div>
+      <button class="btn btn-icon btn-danger" onclick="removeItem('${item.uid}')" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+  calcTotals();
+}
+
+function onSelectItem(uid, stockId) {
+  const item = billItems.find(i => i.uid == uid);
+  if (!item) return;
+  item.stockId = stockId;
+  const s = findStock(stockId);
+  if (s) item.price = s.price;
+  renderItems();
+}
+
+function onQty(uid, val) {
+  const item = billItems.find(i => i.uid == uid);
+  if (item) { item.qty = Math.max(1, parseInt(val)||1); renderItems(); }
+}
+
+function onPrice(uid, val) {
+  const item = billItems.find(i => i.uid == uid);
+  if (item) { item.price = Math.max(0, parseFloat(val)||0); renderItems(); }
+}
+
+function calcTotals() {
+  const sub  = billItems.reduce((s,i) => s + i.qty * i.price, 0);
+  const gst  = parseFloat(document.getElementById('b-gst')?.value  || 0);
+  const disc = parseFloat(document.getElementById('b-disc')?.value || 0);
+  const gstA = sub * gst / 100;
+  const tot  = Math.max(0, sub + gstA - disc);
+  document.getElementById('t-sub').textContent   = '₹' + sub.toFixed(2);
+  document.getElementById('t-gst').textContent   = '₹' + gstA.toFixed(2) + ' (' + gst + '%)';
+  document.getElementById('t-disc').textContent  = '-₹' + disc.toFixed(2);
+  document.getElementById('t-grand').textContent = '₹' + tot.toFixed(2);
+}
+
+function updateWarrantyPreview() {
+  const months = parseInt(document.getElementById('b-warr').value)||0;
+  const start  = document.getElementById('b-warr-start').value;
+  const el     = document.getElementById('warranty-preview');
+  if (months > 0 && start) {
+    const end = new Date(new Date(start).setMonth(new Date(start).getMonth() + months)).toISOString().split('T')[0];
+    el.innerHTML = `<div class="warranty-card">✅ <strong>Warranty:</strong> ${months} Months &nbsp;|&nbsp; From: <strong>${start}</strong> &nbsp;|&nbsp; To: <strong>${end}</strong></div>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function getBillData() {
+  const customer = document.getElementById('b-name').value.trim();
+  const phone    = document.getElementById('b-phone').value.trim();
+  const address  = document.getElementById('b-addr').value.trim();
+  const date     = document.getElementById('b-date').value;
+  const warrM    = parseInt(document.getElementById('b-warr').value)||0;
+  const warrS    = document.getElementById('b-warr-start').value;
+  const gst      = parseFloat(document.getElementById('b-gst').value)||0;
+  const disc     = parseFloat(document.getElementById('b-disc').value)||0;
+  const payment  = document.getElementById('b-pay').value;
+  const notes    = document.getElementById('b-notes').value.trim();
+  const warrE    = warrS ? new Date(new Date(warrS).setMonth(new Date(warrS).getMonth()+warrM)).toISOString().split('T')[0] : '';
+  const sub      = billItems.reduce((s,i) => s + i.qty * i.price, 0);
+  const gstAmt   = sub * gst / 100;
+  const total    = Math.max(0, sub + gstAmt - disc);
+  const items    = billItems.filter(i=>i.stockId).map(i=>{
+    const s = findStock(i.stockId);
+    return { name: s?.name||i.stockId, qty:i.qty, price:i.price, amount:i.qty*i.price };
+  });
+  return { customer, phone, address, date, warrM, warrS, warrE, gst, gstAmt, disc, payment, notes, items, sub, total };
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(() => { if(el) el.innerHTML=''; }, 3500);
+}
+
+function saveBill() {
+  const d = getBillData();
+  if (!d.customer)      { showAlert('bill-alert','⚠️ Please enter customer name','error'); return; }
+  if (!d.items.length)  { showAlert('bill-alert','⚠️ Please add at least one item','error'); return; }
+
+  // Deduct from stock
+  billItems.forEach(bi => {
+    if (bi.stockId) {
+      const s = findStock(bi.stockId);
+      if (s) s.qty = Math.max(0, s.qty - bi.qty);
+    }
+  });
+
+  const billNo = 'RB-' + (++S.counter);
+  S.bills.push({ ...d, billNo, id: Date.now() });
+  showAlert('bill-alert', `✅ Bill <strong>${billNo}</strong> saved successfully!`, 'success');
+  resetBill();
+}
+
+function resetBill() {
+  billItems = [];
+  ['b-name','b-phone','b-addr','b-notes','b-warr'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('b-gst').value  = '18';
+  document.getElementById('b-disc').value = '0';
+  initBilling();
+}
+
+function previewPDF() {
+  const d = getBillData();
+  if (!d.customer)     { showAlert('bill-alert','⚠️ Please enter customer name','error'); return; }
+  if (!d.items.length) { showAlert('bill-alert','⚠️ Please add at least one item','error'); return; }
+  generatePDF(d, 'RB-PREVIEW');
+}
+
+// ============================================================
+// PDF GENERATION — Professional, No GST
+// ============================================================
+function generatePDF(d, billNo) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const W = 210, PH = 297;
+
+  // Color palette
+  const NAVY   = [15, 23, 52];
+  const GOLD   = [212, 160, 23];
+  const GOLD2  = [245, 197, 66];
+  const WHITE  = [255, 255, 255];
+  const LIGHT  = [245, 246, 250];
+  const MUTED  = [120, 130, 150];
+  const DARK   = [30, 35, 50];
+  const GREEN  = [22, 101, 52];
+  const GREENBG= [220, 252, 231];
+  const ACCENT = [232, 240, 255];
+
+  // ══════════════════════════════════════════
+  // TOP HEADER BAND
+  // ══════════════════════════════════════════
+  // Deep navy full-width header
+  doc.setFillColor(...NAVY);
+  doc.rect(0, 0, W, 52, 'F');
+
+  // Gold left accent bar
+  doc.setFillColor(...GOLD);
+  doc.rect(0, 0, 5, 52, 'F');
+
+  // Lightning bolt symbol area
+  doc.setFillColor(...GOLD);
+  doc.roundedRect(13, 8, 14, 14, 2, 2, 'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(13);
+  doc.setTextColor(...NAVY);
+  doc.text('RB', 15.5, 18.5);
+
+  // Company name
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(22);
+  doc.setTextColor(...GOLD2);
+  doc.text('RAJ BATTERY', 32, 18);
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...MUTED);
+  doc.text('Battery Sales & Services  |  Rajkot, Gujarat', 32, 25);
+  doc.text('Mo: +91-XXXXXXXXXX  |  rajbattery@gmail.com', 32, 31);
+
+  // Right side — CASH MEMO / INVOICE label
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(16);
+  doc.setTextColor(...WHITE);
+  doc.text('CASH MEMO', W - 14, 17, { align: 'right' });
+
+  // Pill badge under title
+  doc.setFillColor(...GOLD);
+  doc.roundedRect(W - 62, 20, 48, 7, 3, 3, 'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...NAVY);
+  doc.text('Bill No: ' + billNo, W - 39, 25, { align: 'center' });
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...MUTED);
+  doc.text('Date: ' + (d.date || new Date().toISOString().split('T')[0]), W - 14, 34, { align: 'right' });
+  doc.text('Payment: ' + d.payment, W - 14, 41, { align: 'right' });
+
+  // Decorative bottom border of header
+  doc.setFillColor(...GOLD);
+  doc.rect(0, 52, W, 1.2, 'F');
+
+  let y = 62;
+
+  // ══════════════════════════════════════════
+  // CUSTOMER + BILL INFO SECTION
+  // ══════════════════════════════════════════
+
+  // Left: Customer card
+  doc.setFillColor(...LIGHT);
+  doc.roundedRect(14, y, 94, 36, 3, 3, 'F');
+  // Left accent bar on card
+  doc.setFillColor(...GOLD);
+  doc.rect(14, y, 3, 36, 'F');
+  doc.setFillColor(...LIGHT);
+  doc.roundedRect(14, y, 3, 36, 1, 1, 'F'); // soften corner
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...MUTED);
+  doc.text('CUSTOMER DETAILS', 22, y + 7);
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(13);
+  doc.setTextColor(...DARK);
+  doc.text(d.customer || 'N/A', 22, y + 16);
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  let cy = y + 23;
+  if (d.phone) { doc.text('Phone: ' + d.phone, 22, cy); cy += 7; }
+  if (d.address) {
+    const lines = doc.splitTextToSize(d.address, 82);
+    doc.text(lines, 22, cy);
+  }
+
+  // Right: Bill meta card
+  doc.setFillColor(...LIGHT);
+  doc.roundedRect(114, y, 82, 36, 3, 3, 'F');
+  doc.setFillColor(...GOLD);
+  doc.rect(114, y, 3, 36, 'F');
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...MUTED);
+  doc.text('BILL INFORMATION', 122, y + 7);
+
+  const meta = [
+    ['Bill No',    billNo],
+    ['Bill Date',  d.date || '—'],
+    ['Payment',    d.payment],
+  ];
+  if (d.disc > 0) meta.push(['Discount', '-Rs. ' + d.disc.toFixed(2)]);
+
+  doc.setFontSize(9);
+  let my = y + 16;
+  meta.forEach(([k, v]) => {
+    doc.setFont('helvetica','normal'); doc.setTextColor(...MUTED);
+    doc.text(k + ':', 122, my);
+    doc.setFont('helvetica','bold'); doc.setTextColor(...DARK);
+    doc.text(v, 192, my, { align: 'right' });
+    my += 7;
+  });
+
+  y += 44;
+
+  // ══════════════════════════════════════════
+  // WARRANTY CERTIFICATE BAND
+  // ══════════════════════════════════════════
+  if (d.warrM) {
+    // Outer border
+    doc.setDrawColor(...GREEN);
+    doc.setLineWidth(0.6);
+    doc.roundedRect(14, y, 182, 18, 3, 3);
+    doc.setFillColor(...GREENBG);
+    doc.roundedRect(14, y, 182, 18, 3, 3, 'F');
+
+    // Green left accent
+    doc.setFillColor(...GREEN);
+    doc.roundedRect(14, y, 4, 18, 2, 2, 'F');
+
+    // Checkmark icon area
+    doc.setFillColor(...GREEN);
+    doc.circle(26, y + 9, 4, 'F');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...WHITE);
+    doc.text('W', 23.5, y + 11.5);
+
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...GREEN);
+    doc.text('WARRANTY CERTIFICATE', 34, y + 7);
+
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9);
+    doc.setTextColor(30, 80, 50);
+
+    // Three warranty fields in a row
+    doc.setFont('helvetica','bold');
+    doc.text('Period:', 34, y + 14);
+    doc.setFont('helvetica','normal');
+    doc.text(d.warrM + ' Months', 54, y + 14);
+
+    doc.setFont('helvetica','bold');
+    doc.text('From:', 100, y + 14);
+    doc.setFont('helvetica','normal');
+    doc.text(d.warrS, 114, y + 14);
+
+    doc.setFont('helvetica','bold');
+    doc.text('Valid Till:', 150, y + 14);
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(160, 20, 20);
+    doc.text(d.warrE, 172, y + 14);
+
+    y += 26;
+  }
+
+  // ══════════════════════════════════════════
+  // ITEMS TABLE — SECTION HEADING
+  // ══════════════════════════════════════════
+  doc.setFillColor(...NAVY);
+  doc.roundedRect(14, y, 182, 8, 2, 2, 'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(8);
+  doc.setTextColor(...GOLD2);
+  doc.text('PURCHASED ITEMS', 18, y + 5.5);
+  y += 10;
+
+  // ══════════════════════════════════════════
+  // ITEMS TABLE
+  // ══════════════════════════════════════════
+  doc.autoTable({
+    startY: y,
+    head: [['#', 'Battery / Item Description', 'Qty', 'Rate (Rs.)', 'Amount (Rs.)']],
+    body: d.items.map((it, i) => [
+      i + 1,
+      it.name,
+      it.qty,
+      it.price.toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+      it.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })
+    ]),
+    theme: 'plain',
+    headStyles: {
+      fillColor: ACCENT,
+      textColor: NAVY,
+      fontSize: 8.5,
+      fontStyle: 'bold',
+      cellPadding: { top: 5, bottom: 5, left: 5, right: 5 },
+      lineColor: [200, 210, 235],
+      lineWidth: 0.3,
+    },
+    bodyStyles: {
+      fontSize: 9.5,
+      cellPadding: { top: 5, bottom: 5, left: 5, right: 5 },
+      textColor: DARK,
+      lineColor: [220, 225, 235],
+      lineWidth: 0.2,
+    },
+    alternateRowStyles: { fillColor: [250, 251, 255] },
+    columnStyles: {
+      0: { cellWidth: 10, halign: 'center', textColor: MUTED },
+      1: { cellWidth: 90 },
+      2: { cellWidth: 18, halign: 'center', fontStyle: 'bold' },
+      3: { cellWidth: 34, halign: 'right' },
+      4: { cellWidth: 34, halign: 'right', fontStyle: 'bold', textColor: NAVY },
+    },
+    margin: { left: 14, right: 14 },
+    tableLineColor: [210, 215, 230],
+    tableLineWidth: 0.3,
+  });
+
+  y = doc.lastAutoTable.finalY + 4;
+
+  // ══════════════════════════════════════════
+  // TOTALS BLOCK (right-aligned)
+  // ══════════════════════════════════════════
+  const TX = 114, TW = 82;
+  let ty = y + 4;
+
+  // Subtotal row
+  if (d.disc > 0) {
+    doc.setDrawColor(220, 225, 235);
+    doc.setLineWidth(0.3);
+    doc.line(TX, ty - 1, TX + TW, ty - 1);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...MUTED);
+    doc.text('Subtotal', TX + 2, ty + 4);
+    doc.setTextColor(...DARK);
+    doc.text('Rs. ' + d.sub.toFixed(2), TX + TW - 2, ty + 4, { align: 'right' });
+    ty += 9;
+
+    doc.text('Discount', TX + 2, ty + 4);
+    doc.setTextColor(180, 30, 30);
+    doc.text('- Rs. ' + d.disc.toFixed(2), TX + TW - 2, ty + 4, { align: 'right' });
+    ty += 9;
+  }
+
+  // Grand total box — premium style
+  doc.setFillColor(...NAVY);
+  doc.roundedRect(TX, ty, TW, 16, 3, 3, 'F');
+  doc.setFillColor(...GOLD);
+  doc.rect(TX, ty, 4, 16, 'F');
+  doc.roundedRect(TX, ty, 4, 16, 1, 1, 'F');
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  doc.text('TOTAL AMOUNT', TX + 8, ty + 6.5);
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.setTextColor(...GOLD2);
+  doc.text('Rs. ' + d.total.toFixed(2), TX + TW - 4, ty + 12, { align: 'right' });
+
+  ty += 16;
+
+  // Amount in words (simple)
+  const inWords = amountToWords(Math.round(d.total));
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(8);
+  doc.setTextColor(...MUTED);
+  doc.text('Amount in words: ' + inWords + ' Only', TX, ty + 5);
+
+  // ══════════════════════════════════════════
+  // NOTES (left side)
+  // ══════════════════════════════════════════
+  if (d.notes) {
+    doc.setFillColor(255, 252, 235);
+    doc.roundedRect(14, y + 4, 94, 14, 2, 2, 'F');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GOLD);
+    doc.text('NOTE:', 18, y + 11);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(80, 70, 30);
+    const nl = doc.splitTextToSize(d.notes, 84);
+    doc.text(nl, 30, y + 11);
+  }
+
+  // ══════════════════════════════════════════
+  // SIGNATURE LINE (left side, near bottom)
+  // ══════════════════════════════════════════
+  const sigY = Math.max(ty + 18, y + 36);
+  doc.setDrawColor(...MUTED);
+  doc.setLineWidth(0.4);
+  doc.line(14, sigY, 70, sigY);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...MUTED);
+  doc.text('Customer Signature', 14, sigY + 5);
+
+  doc.line(130, sigY, 196, sigY);
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(...NAVY);
+  doc.text('Authorized Signatory', 130, sigY + 5);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...MUTED);
+  doc.text('Raj Battery, Rajkot', 130, sigY + 10);
+
+  // ══════════════════════════════════════════
+  // FOOTER BAND
+  // ══════════════════════════════════════════
+  // Top border stripe
+  doc.setFillColor(...GOLD);
+  doc.rect(0, PH - 26, W, 1.5, 'F');
+
+  doc.setFillColor(...NAVY);
+  doc.rect(0, PH - 24.5, W, 24.5, 'F');
+
+  // Left accent
+  doc.setFillColor(...GOLD);
+  doc.rect(0, PH - 24.5, 5, 24.5, 'F');
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...GOLD2);
+  doc.text('Thank you for your business!', W / 2, PH - 16, { align: 'center' });
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...MUTED);
+  doc.text('Raj Battery  |  Rajkot, Gujarat  |  +91-XXXXXXXXXX  |  rajbattery@gmail.com', W / 2, PH - 9, { align: 'center' });
+  doc.text('Computer generated bill — valid without physical signature', W / 2, PH - 4, { align: 'center' });
+
+  doc.save('RajBattery_' + (d.customer||'Bill').replace(/\s+/g,'_') + '_' + billNo + '.pdf');
+}
+
+// ── Helper: amount to words (Indian style) ──
+function amountToWords(n) {
+  if (n === 0) return 'Zero Rupees';
+  const ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine',
+    'Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function words(num) {
+    if (num === 0) return '';
+    if (num < 20) return ones[num] + ' ';
+    if (num < 100) return tens[Math.floor(num/10)] + (num%10 ? ' ' + ones[num%10] : '') + ' ';
+    if (num < 1000) return ones[Math.floor(num/100)] + ' Hundred ' + words(num%100);
+    if (num < 100000) return words(Math.floor(num/1000)) + 'Thousand ' + words(num%1000);
+    if (num < 10000000) return words(Math.floor(num/100000)) + 'Lakh ' + words(num%100000);
+    return words(Math.floor(num/10000000)) + 'Crore ' + words(n%10000000);
+  }
+  return ('Rupees ' + words(n)).replace(/\s+/g,' ').trim();
+}
+
+// ============================================================
+// CUSTOMERS
+// ============================================================
+function getCustomerList() {
+  const map = {};
+  S.bills.forEach(b => {
+    if (!map[b.customer]) map[b.customer] = { name:b.customer, phone:b.phone, address:b.address, bills:0, total:0, last:'' };
+    map[b.customer].bills++;
+    map[b.customer].total += b.total;
+    if (!map[b.customer].last || b.date > map[b.customer].last) map[b.customer].last = b.date;
+  });
+  return Object.values(map);
+}
+
+function renderCustomers(filter='') {
+  const list = getCustomerList().filter(c => !filter || c.name.toLowerCase().includes(filter.toLowerCase()) || (c.phone||'').includes(filter));
+  document.getElementById('cust-count').textContent = list.length + ' customers';
+  const el = document.getElementById('cust-table');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>No customers yet. Create a bill first.</div>';
+    return;
+  }
+  el.innerHTML = '<table><tr><th>Customer</th><th>Phone</th><th>Bills</th><th>Total Spent</th><th>Last Bill</th></tr>' +
+    list.sort((a,b)=>b.total-a.total).map(c =>
+      `<tr>
+        <td><strong>${c.name}</strong><br><small style="color:var(--text2)">${c.address||''}</small></td>
+        <td>${c.phone||'—'}</td>
+        <td><span class="badge badge-blue">${c.bills}</span></td>
+        <td><strong>₹${c.total.toLocaleString('en-IN')}</strong></td>
+        <td>${c.last||'—'}</td>
+      </tr>`
+    ).join('') + '</table>';
+}
+
+function filterCustomers(q) { renderCustomers(q); }
+
+// ============================================================
+// STOCK
+// ============================================================
+function renderAllStock() {
+  renderStockSection('lb');
+  renderStockSection('ah');
+  renderStockSection('inv');
+}
+
+function renderStockSection(cat) {
+  const el = document.getElementById('sl-' + cat);
+  el.innerHTML = S.stock[cat].map(item => `
+    <div class="stock-row">
+      <div>
+        <div class="stock-name">${item.name}</div>
+        <div class="stock-meta">Price: ₹${item.price.toLocaleString('en-IN')} &nbsp;|&nbsp; Min Alert: ${item.min} units</div>
+      </div>
+      <div class="stock-controls">
+        <button class="qty-btn" onclick="adjStock('${item.id}', -1)">−</button>
+        <input class="qty-box" type="number" value="${item.qty}" min="0"
+          onchange="setStock('${item.id}', parseInt(this.value)||0)">
+        <button class="qty-btn" onclick="adjStock('${item.id}', 1)">+</button>
+        <span class="badge ${item.qty===0?'badge-red':item.qty<=item.min?'badge-amber':'badge-green'}" style="min-width:65px;text-align:center;">
+          ${item.qty===0 ? 'Out of Stock' : item.qty<=item.min ? 'Low Stock' : 'In Stock'}
+        </span>
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:2px;font-weight:600;">PRICE (₹)</div>
+          <input class="price-box" type="number" value="${item.price}" min="0"
+            onchange="setPrice('${item.id}', parseInt(this.value)||0)" title="Update price">
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function adjStock(id, delta) {
+  const s = findStock(id);
+  if (s) { s.qty = Math.max(0, s.qty + delta); renderAllStock(); }
+}
+
+function setStock(id, val) {
+  const s = findStock(id);
+  if (s) { s.qty = Math.max(0, val); renderAllStock(); }
+}
+
+function setPrice(id, val) {
+  const s = findStock(id);
+  if (s) s.price = val;
+}
+
+function showStockTab(tab, el) {
+  ['lb','ah','inv'].forEach(t => {
+    document.getElementById('stock-' + t).style.display = t===tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ============================================================
+// ALL BILLS
+// ============================================================
+let currentBillId = null;
+
+function renderBills(filter='') {
+  const list = [...S.bills].reverse().filter(b =>
+    !filter ||
+    b.customer.toLowerCase().includes(filter.toLowerCase()) ||
+    b.billNo.toLowerCase().includes(filter.toLowerCase())
+  );
+  document.getElementById('bills-count').textContent = list.length + ' bills';
+  const el = document.getElementById('bills-table');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📄</div>No bills found</div>';
+    return;
+  }
+  el.innerHTML = '<table><tr><th>Bill #</th><th>Customer</th><th>Date</th><th>Items</th><th>Payment</th><th>Warranty</th><th>Total</th><th>Actions</th></tr>' +
+    list.map(b => `<tr>
+      <td><span class="badge badge-navy">${b.billNo}</span></td>
+      <td><strong>${b.customer}</strong><br><small style="color:var(--text2)">${b.phone||''}</small></td>
+      <td>${b.date}</td>
+      <td><span class="badge badge-blue">${b.items.length} item${b.items.length!==1?'s':''}</span></td>
+      <td>${b.payment}</td>
+      <td>${b.warrM ? `<span class="badge badge-green">${b.warrM}mo</span><br><small>${b.warrE}</small>` : '<span style="color:var(--text2)">None</span>'}</td>
+      <td><strong style="font-size:15px;">₹${b.total.toLocaleString('en-IN')}</strong></td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm btn-primary" onclick="viewBill(${b.id})" title="View">👁 View</button>
+          <button class="btn btn-sm btn-gold" onclick="dlBillPDF(${b.id})" title="PDF">📄 PDF</button>
+        </div>
+      </td>
+    </tr>`).join('') + '</table>';
+}
+
+function filterBills(q) { renderBills(q); }
+
+function viewBill(id) {
+  const b = S.bills.find(x => x.id === id);
+  if (!b) return;
+  currentBillId = id;
+  document.getElementById('modal-title').textContent = 'Bill ' + b.billNo;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="grid2" style="margin-bottom:16px;">
+      <div><div class="stat-label" style="margin-top:0;">Customer</div><div style="font-size:16px;font-weight:700;">${b.customer}</div>${b.phone?`<div style="font-size:13px;color:var(--text2);">${b.phone}</div>`:''}</div>
+      <div><div class="stat-label" style="margin-top:0;">Bill Info</div><div style="font-size:15px;font-weight:700;">${b.billNo}</div><div style="font-size:13px;color:var(--text2);">${b.date} &nbsp;|&nbsp; ${b.payment}</div></div>
+    </div>
+    ${b.warrM ? `<div class="warranty-card" style="margin-bottom:14px;">✅ <strong>Warranty:</strong> ${b.warrM} Months &nbsp;|&nbsp; From: <strong>${b.warrS}</strong> &nbsp;→&nbsp; To: <strong>${b.warrE}</strong></div>` : ''}
+    <div class="table-wrap">
+    <table>
+      <tr><th>#</th><th>Item</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr>
+      ${b.items.map((it,i)=>`<tr><td>${i+1}</td><td>${it.name}</td><td>${it.qty}</td><td>₹${it.price.toLocaleString('en-IN')}</td><td><strong>₹${it.amount.toLocaleString('en-IN')}</strong></td></tr>`).join('')}
+    </table>
+    </div>
+    <div style="text-align:right;margin-top:14px;padding:12px 16px;background:#f8fafc;border-radius:8px;">
+      <div style="font-size:13px;color:var(--text2);">Subtotal: ₹${b.sub.toFixed(2)}</div>
+      <div style="font-size:13px;color:var(--text2);">GST (${b.gst}%): ₹${b.gstAmt.toFixed(2)}</div>
+      ${b.disc>0?`<div style="font-size:13px;color:var(--red);">Discount: -₹${b.disc.toFixed(2)}</div>`:''}
+      <div style="font-size:20px;font-weight:700;color:var(--navy);margin-top:6px;">Total: ₹${b.total.toLocaleString('en-IN')}</div>
+    </div>
+    ${b.notes?`<div style="margin-top:10px;font-size:13px;color:var(--text2);font-style:italic;">📝 ${b.notes}</div>`:''}
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+function dlBillPDF(id) {
+  const b = S.bills.find(x => x.id === id);
+  if (b) generatePDF(b, b.billNo);
+}
+
+function dlModalPDF() {
+  if (currentBillId) dlBillPDF(currentBillId);
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  currentBillId = null;
+}
+
+// Close modal on backdrop click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+(function init() {
+  renderAllStock();
+  showStockTab('lb', document.querySelector('.tabs .tab'));
+  initBilling();
+  renderDashboard();
+})();
+</script>
+</body>
+</html>
